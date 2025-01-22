@@ -1,7 +1,8 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Types, Document } from 'mongoose';
 
 // Define a TypeScript interface for the User document
 export interface IUser extends Document {
+    _id: Types.ObjectId;
     name: string;
     email: string;
     password?: string; // Optional since `select: false` excludes it by default

@@ -15,34 +15,25 @@ const schema = z.object({
 });
 
 export async function loginUserActions(formData: FormData) {
-    // Extract form data values
-    const email = formData.get('email') as string | null;
-    const password = formData.get('password') as string | null;
+    // Validate data
+    const validatedFields = schema.safeParse({
+        email: formData.get('email') as string,
+        password: formData.get('password') as string,
+    });
 
-    // Validate required fields
-    if (!email || !password) {
+    if (!validatedFields.success) {
+        // Safeguard against missing or unexpected error structure
+        const errorMessage =
+            validatedFields.error.errors?.[0]?.message ||
+            'Unknown validation error';
+        console.error('Validation error:', errorMessage);
         return {
-            error: 'Missing required fields',
+            error: errorMessage,
             status: 400,
         };
     }
 
-    // Validate data
-    // const validatedFields = schema.safeParse({ email, password });
-
-    // if (!validatedFields.success) {
-    //     // Safeguard against missing or unexpected error structure
-    //     const errorMessage =
-    //         validatedFields.error.errors?.[0]?.message ||
-    //         'Unknown validation error';
-    //     console.error('Validation error:', errorMessage);
-    //     return {
-    //         error: errorMessage,
-    //         status: 400,
-    //     };
-    // }
-
-    // const { data } = validatedFields;
+    const { email, password } = validatedFields.data;
     try {
         // Connect to database
         await connectToDatabase();
@@ -68,22 +59,23 @@ export async function loginUserActions(formData: FormData) {
         }
 
         //token
-        // const userToken = await new SignJWT({
-        //     userId: user._id.toString(),
-        //     email: user.email,
-        // })
-        //     .setProtectedHeader({ alg: 'HS256' })
-        //     .setIssuedAt()
-        //     .setExpirationTime('2h')
-        //     .sign(new TextEncoder().encode(process.env.JWT_SECRET));
+        const userToken = await new SignJWT({
+            userId: user._id.toString(),
+            email: user.email,
+            userName: user.name,
+        })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setIssuedAt()
+            .setExpirationTime('2h')
+            .sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
-        // (await cookies()).set('token', userToken, {
-        //     httpOnly: true,
-        //     secure: false,
-        //     sameSite: 'strict',
-        //     maxAge: 7200,
-        //     path: '/',
-        // });
+        (await cookies()).set('token', userToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'strict',
+            maxAge: 7200,
+            path: '/',
+        });
 
         return {
             success: 'Logged in successfully',

@@ -14,35 +14,27 @@ const schema = z.object({
 });
 
 export async function registerUserActions(formData: FormData) {
-    // Extract data values
-    const name = formData.get('name') as string | null;
-    const email = formData.get('email') as string | null;
-    const password = formData.get('password') as string | null;
+    // Validate data
+    const validatedFields = schema.safeParse({
+        name: formData.get('name') as string,
+        email: formData.get('email') as string,
+        password: formData.get('password') as string,
+    });
 
-    // Validate required fields
-    if (!name || !email || !password) {
+    if (!validatedFields.success) {
+        // Safeguard against missing or unexpected error structure
+        const errorMessage =
+            validatedFields.error.errors?.[0]?.message ||
+            'Unknown validation error';
+        console.error('Validation error:', errorMessage);
         return {
-            error: 'Missing required fields',
+            error: errorMessage,
             status: 400,
         };
     }
 
-    // Validate data
-    // const validatedFields = schema.safeParse({ name, email, password });
+    const { name, email, password } = validatedFields.data;
 
-    // if (!validatedFields.success) {
-    //     // Safeguard against missing or unexpected error structure
-    //     const errorMessage =
-    //         validatedFields.error.errors?.[0]?.message ||
-    //         'Unknown validation error';
-    //     console.error('Validation error:', errorMessage);
-    //     return {
-    //         error: errorMessage,
-    //         status: 400,
-    //     };
-    // }
-
-    // const { data } = validatedFields;
     try {
         // Database connection
         await connectToDatabase();

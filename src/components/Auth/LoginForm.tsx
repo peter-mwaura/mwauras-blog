@@ -10,6 +10,7 @@ import { Input } from '../ui/input';
 import { Key, Mail, User } from 'lucide-react';
 import { Button } from '../ui/button';
 import { loginUserActions } from '@/actions/login';
+// import { cookies } from 'next/headers';
 
 const schema = z.object({
     email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -21,6 +22,7 @@ const schema = z.object({
 type LoginFormFieldsType = z.infer<typeof schema>;
 
 export default function LoginForm() {
+    // const token = (await cookies()).get('token')?.value;
     const [isLoading, setIsLoading] = useState(false);
 
     const {
