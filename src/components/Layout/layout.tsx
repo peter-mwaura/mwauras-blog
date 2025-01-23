@@ -1,15 +1,16 @@
 import { ReactNode } from 'react';
 import Header from './header';
+import { commonLayoutActions } from '@/actions/commonLayout';
 
 type CommonLayoutProps = {
     children: ReactNode;
 };
 
-export default function CommonLayout({ children }: CommonLayoutProps) {
-    const isAuth = false;
+export default async function CommonLayout({ children }: CommonLayoutProps) {
+    const user = await commonLayoutActions();
     return (
         <div className="min-h-screen bg-white">
-            {isAuth && <Header />}
+            {user && <Header />}
             {children}
         </div>
     );
